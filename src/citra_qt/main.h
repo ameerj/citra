@@ -198,6 +198,7 @@ private slots:
     void InitializeHotkeys();
     void ToggleFullscreen();
     void ChangeScreenLayout();
+    void UpdateSecondaryWindowVisibility();
     void ToggleScreenLayout();
     void OnSwapScreens();
     void OnRotateScreens();
@@ -238,6 +239,7 @@ private:
     std::unique_ptr<Ui::MainWindow> ui;
 
     GRenderWindow* render_window;
+    GRenderWindow* secondary_window;
 
     GameListPlaceholder* game_list_placeholder;
     LoadingScreen* loading_screen;

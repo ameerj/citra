@@ -250,12 +250,12 @@ void EmuWindow_SDL2::PollEvents() {
 
     // SDL_PollEvent returns 0 when there are no more events in the event queue
     while (SDL_PollEvent(&event)) {
+        if (event.window.windowID != render_window_id) {
+            other_window_events.push_back(event);
+            continue;
+        }
         switch (event.type) {
         case SDL_WINDOWEVENT:
-            if (event.window.windowID != render_window_id) {
-                other_window_events.push_back(event);
-                continue;
-            }
             switch (event.window.event) {
             case SDL_WINDOWEVENT_SIZE_CHANGED:
             case SDL_WINDOWEVENT_RESIZED:

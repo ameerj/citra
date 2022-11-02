@@ -362,8 +362,8 @@ int main(int argc, char** argv) {
 
     EmuWindow_SDL2::InitializeSDL2();
 
-    std::unique_ptr<EmuWindow_SDL2> emu_window{std::make_unique<EmuWindow_SDL2>(fullscreen)};
     std::unique_ptr<EmuWindow_SDL2> secondary_window{std::make_unique<EmuWindow_SDL2>(fullscreen)};
+    std::unique_ptr<EmuWindow_SDL2> emu_window{std::make_unique<EmuWindow_SDL2>(fullscreen)};
     Frontend::ScopeAcquireContext scope(*emu_window);
     Frontend::ScopeAcquireContext scope2(*secondary_window);
 

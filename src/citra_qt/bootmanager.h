@@ -129,7 +129,8 @@ signals:
 class OpenGLWindow : public QWindow {
     Q_OBJECT
 public:
-    explicit OpenGLWindow(QWindow* parent, QWidget* event_handler, QOpenGLContext* shared_context);
+    explicit OpenGLWindow(QWindow* parent, QWidget* event_handler, QOpenGLContext* shared_context,
+                          bool is_secondary = false);
 
     ~OpenGLWindow();
 
@@ -142,6 +143,7 @@ protected:
 private:
     std::unique_ptr<QOpenGLContext> context;
     QWidget* event_handler;
+    bool is_secondary;
 };
 
 class GRenderWindow : public QWidget, public Frontend::EmuWindow {
@@ -179,7 +181,7 @@ public:
 
     void focusOutEvent(QFocusEvent* event) override;
 
-    void InitRenderTarget();
+    void InitRenderTarget(bool is_secondary);
 
     /// Destroy the previous run's child_widget which should also destroy the child_window
     void ReleaseRenderTarget();

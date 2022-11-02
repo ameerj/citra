@@ -375,14 +375,13 @@ void RendererOpenGL::SwapBuffers() {
 
     RenderScreenshot();
 
-    auto main_layout = render_window.GetFramebufferLayout();
-    main_layout.bottom_screen_enabled = false;
+    const auto& main_layout = render_window.GetFramebufferLayout();
     RenderToMailbox(main_layout, render_window.mailbox, false);
 
-    auto secondary_layout = secondary_window.GetFramebufferLayout();
-    secondary_layout.top_screen_enabled = false;
-    RenderToMailbox(secondary_layout, secondary_window.mailbox, false);
-
+    if (Settings::values.layout_option == Settings::LayoutOption::SeparateWindows) {
+        const auto& secondary_layout = secondary_window.GetFramebufferLayout();
+        RenderToMailbox(secondary_layout, secondary_window.mailbox, false);
+    }
     if (frame_dumper.IsDumping()) {
         try {
             RenderToMailbox(frame_dumper.GetLayout(), frame_dumper.mailbox, true);

@@ -113,9 +113,10 @@ void EmuThread::run() {
 #endif
 }
 
-OpenGLWindow::OpenGLWindow(QWindow* parent, QWidget* event_handler, QOpenGLContext* shared_context)
+OpenGLWindow::OpenGLWindow(QWindow* parent, QWidget* event_handler, QOpenGLContext* shared_context,
+                           bool is_secondary)
     : QWindow(parent), context(std::make_unique<QOpenGLContext>(shared_context->parent())),
-      event_handler(event_handler) {
+      event_handler(event_handler), is_secondary{is_secondary} {
 
     // disable vsync for any shared contexts
     auto format = shared_context->format();
@@ -143,7 +144,7 @@ void OpenGLWindow::Present() {
 
     context->makeCurrent(this);
     if (VideoCore::g_renderer) {
-        VideoCore::g_renderer->TryPresent(100);
+        VideoCore::g_renderer->TryPresent(100, is_secondary);
     }
     context->swapBuffers(this);
     auto f = context->versionFunctions<QOpenGLFunctions_4_3_Core>();
@@ -207,7 +208,6 @@ GRenderWindow::GRenderWindow(QWidget* parent_, EmuThread* emu_thread)
     auto layout = new QHBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
     setLayout(layout);
-    InputCommon::Init();
 
     this->setMouseTracking(true);
 
@@ -215,9 +215,7 @@ GRenderWindow::GRenderWindow(QWidget* parent_, EmuThread* emu_thread)
     connect(this, &GRenderWindow::FirstFrameDisplayed, parent, &GMainWindow::OnLoadComplete);
 }
 
-GRenderWindow::~GRenderWindow() {
-    InputCommon::Shutdown();
-}
+GRenderWindow::~GRenderWindow() = default;
 
 void GRenderWindow::MakeCurrent() {
     core_context->MakeCurrent();
@@ -389,14 +387,15 @@ void GRenderWindow::resizeEvent(QResizeEvent* event) {
     OnFramebufferSizeChanged();
 }
 
-void GRenderWindow::InitRenderTarget() {
+void GRenderWindow::InitRenderTarget(bool is_secondary) {
     ReleaseRenderTarget();
 
     first_frame = false;
 
     GMainWindow* parent = GetMainWindow();
     QWindow* parent_win_handle = parent ? parent->windowHandle() : nullptr;
-    child_window = new OpenGLWindow(parent_win_handle, this, QOpenGLContext::globalShareContext());
+    child_window = new OpenGLWindow(parent_win_handle, this, QOpenGLContext::globalShareContext(),
+                                    is_secondary);
     child_window->create();
     child_widget = createWindowContainer(child_window, this);
     child_widget->resize(Core::kScreenTopWidth, Core::kScreenTopHeight + Core::kScreenBottomHeight);
