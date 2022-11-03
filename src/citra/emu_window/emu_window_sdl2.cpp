@@ -135,7 +135,7 @@ void EmuWindow_SDL2::Fullscreen() {
     SDL_MaximizeWindow(render_window);
 }
 
-EmuWindow_SDL2::EmuWindow_SDL2(bool fullscreen) {
+EmuWindow_SDL2::EmuWindow_SDL2(bool fullscreen, bool is_secondary) : EmuWindow(is_secondary) {
     // Initialize the window
     if (Settings::values.use_gles) {
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
@@ -234,7 +234,7 @@ void EmuWindow_SDL2::RestoreContext() {
     SDL_GL_MakeCurrent(render_window, last_saved_context);
 }
 
-void EmuWindow_SDL2::Present(bool is_secondary) {
+void EmuWindow_SDL2::Present() {
     SDL_GL_MakeCurrent(render_window, window_context);
     SDL_GL_SetSwapInterval(1);
     while (IsOpen()) {

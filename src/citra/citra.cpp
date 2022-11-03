@@ -362,10 +362,9 @@ int main(int argc, char** argv) {
 
     EmuWindow_SDL2::InitializeSDL2();
 
-    std::unique_ptr<EmuWindow_SDL2> secondary_window{std::make_unique<EmuWindow_SDL2>(fullscreen)};
-    std::unique_ptr<EmuWindow_SDL2> emu_window{std::make_unique<EmuWindow_SDL2>(fullscreen)};
+    auto secondary_window{std::make_unique<EmuWindow_SDL2>(fullscreen, true)};
+    auto emu_window{std::make_unique<EmuWindow_SDL2>(fullscreen, false)};
     Frontend::ScopeAcquireContext scope(*emu_window);
-    Frontend::ScopeAcquireContext scope2(*secondary_window);
 
     LOG_INFO(Frontend, "Citra Version: {} | {}-{}", Common::g_build_fullname, Common::g_scm_branch,
              Common::g_scm_desc);
@@ -441,8 +440,8 @@ int main(int argc, char** argv) {
         system.VideoDumper().StartDumping(dump_video, layout);
     }
 
-    std::thread main_render_thread([&emu_window] { emu_window->Present(false); });
-    std::thread secondary_render_thread([&secondary_window] { secondary_window->Present(true); });
+    std::thread main_render_thread([&emu_window] { emu_window->Present(); });
+    std::thread secondary_render_thread([&secondary_window] { secondary_window->Present(); });
 
     std::atomic_bool stop_run;
     system.Renderer().Rasterizer()->LoadDiskResources(

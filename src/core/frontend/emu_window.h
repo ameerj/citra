@@ -176,7 +176,7 @@ public:
     std::unique_ptr<TextureMailbox> mailbox = nullptr;
 
 protected:
-    EmuWindow();
+    EmuWindow(bool is_secondary);
     virtual ~EmuWindow();
 
     /**
@@ -203,6 +203,8 @@ protected:
     void NotifyFramebufferLayoutChanged(const Layout::FramebufferLayout& layout) {
         framebuffer_layout = layout;
     }
+
+    bool is_secondary{};
 
 private:
     /**

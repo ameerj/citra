@@ -198,7 +198,7 @@ FramebufferLayout SingleFrameLayout(u32 width, u32 height, bool swapped, bool up
     ASSERT(height > 0);
     // The drawing code needs at least somewhat valid values for both screens
     // so just calculate them both even if the other isn't showing.
-    FramebufferLayout res{width, height, true, true, {}, {}, !upright};
+    FramebufferLayout res{width, height, !swapped, swapped, {}, {}, !upright};
 
     Common::Rectangle<u32> screen_window_area{0, 0, width, height};
     Common::Rectangle<u32> top_screen;
@@ -342,6 +342,13 @@ FramebufferLayout SideFrameLayout(u32 width, u32 height, bool swapped, bool upri
     return res;
 }
 
+FramebufferLayout SeparateWindowsLayout(u32 width, u32 height, bool is_secondary, bool upright) {
+    // When is_secondary is true, we disable the top screen, and enable the bottom screen.
+    // The same logic is found in the SingleFrameLayout using the is_swapped bool.
+    is_secondary = Settings::values.swap_screen ? !is_secondary : is_secondary;
+    return SingleFrameLayout(width, height, is_secondary, upright);
+}
+
 FramebufferLayout CustomFrameLayout(u32 width, u32 height) {
     ASSERT(width > 0);
     ASSERT(height > 0);
@@ -388,8 +395,13 @@ FramebufferLayout FrameLayoutFromResolutionScale(u32 res_scale) {
                     height = Core::kScreenTopHeight * res_scale;
                 }
             }
-            layout = SingleFrameLayout(width, height, Settings::values.swap_screen,
-                                       Settings::values.upright_screen);
+            if (Settings::values.layout_option == Settings::LayoutOption::SeparateWindows) {
+                layout = SeparateWindowsLayout(width, height, Settings::values.swap_screen,
+                                               Settings::values.upright_screen);
+            } else {
+                layout = SingleFrameLayout(width, height, Settings::values.swap_screen,
+                                           Settings::values.upright_screen);
+            }
             break;
         case Settings::LayoutOption::LargeScreen:
             if (Settings::values.upright_screen) {

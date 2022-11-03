@@ -251,8 +251,8 @@ void GMainWindow::InitializeWidgets() {
 #ifdef CITRA_ENABLE_COMPATIBILITY_REPORTING
     ui->action_Report_Compatibility->setVisible(true);
 #endif
-    secondary_window = new GRenderWindow(this, emu_thread.get());
-    render_window = new GRenderWindow(this, emu_thread.get());
+    secondary_window = new GRenderWindow(this, emu_thread.get(), true);
+    render_window = new GRenderWindow(this, emu_thread.get(), false);
     render_window->hide();
     secondary_window->hide();
     secondary_window->setParent(nullptr);
@@ -927,8 +927,8 @@ bool GMainWindow::LoadROM(const QString& filename) {
     if (emu_thread != nullptr)
         ShutdownGame();
 
-    render_window->InitRenderTarget(false);
-    secondary_window->InitRenderTarget(true);
+    render_window->InitRenderTarget();
+    secondary_window->InitRenderTarget();
 
     Frontend::ScopeAcquireContext scope(*render_window);
 

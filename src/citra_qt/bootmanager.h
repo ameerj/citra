@@ -150,7 +150,7 @@ class GRenderWindow : public QWidget, public Frontend::EmuWindow {
     Q_OBJECT
 
 public:
-    GRenderWindow(QWidget* parent, EmuThread* emu_thread);
+    GRenderWindow(QWidget* parent, EmuThread* emu_thread, bool is_secondary);
     ~GRenderWindow() override;
 
     // EmuWindow implementation.
@@ -181,7 +181,7 @@ public:
 
     void focusOutEvent(QFocusEvent* event) override;
 
-    void InitRenderTarget(bool is_secondary);
+    void InitRenderTarget();
 
     /// Destroy the previous run's child_widget which should also destroy the child_window
     void ReleaseRenderTarget();

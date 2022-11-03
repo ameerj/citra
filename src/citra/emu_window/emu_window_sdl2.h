@@ -29,12 +29,12 @@ private:
 
 class EmuWindow_SDL2 : public Frontend::EmuWindow {
 public:
-    explicit EmuWindow_SDL2(bool fullscreen);
+    explicit EmuWindow_SDL2(bool fullscreen, bool is_secondary);
     ~EmuWindow_SDL2();
 
     static void InitializeSDL2();
 
-    void Present(bool is_secondary);
+    void Present();
 
     /// Polls window events
     void PollEvents() override;

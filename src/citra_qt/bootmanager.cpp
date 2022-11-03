@@ -197,8 +197,8 @@ void OpenGLWindow::exposeEvent(QExposeEvent* event) {
     QWindow::exposeEvent(event);
 }
 
-GRenderWindow::GRenderWindow(QWidget* parent_, EmuThread* emu_thread)
-    : QWidget(parent_), emu_thread(emu_thread) {
+GRenderWindow::GRenderWindow(QWidget* parent_, EmuThread* emu_thread, bool is_secondary_)
+    : QWidget(parent_), emu_thread(emu_thread), EmuWindow(is_secondary_) {
 
     setWindowTitle(QStringLiteral("Citra %1 | %2-%3")
                        .arg(QString::fromUtf8(Common::g_build_name),
@@ -387,7 +387,7 @@ void GRenderWindow::resizeEvent(QResizeEvent* event) {
     OnFramebufferSizeChanged();
 }
 
-void GRenderWindow::InitRenderTarget(bool is_secondary) {
+void GRenderWindow::InitRenderTarget() {
     ReleaseRenderTarget();
 
     first_frame = false;
