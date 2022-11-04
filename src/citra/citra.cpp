@@ -362,9 +362,19 @@ int main(int argc, char** argv) {
 
     EmuWindow_SDL2::InitializeSDL2();
 
-    auto emu_window{std::make_unique<EmuWindow_SDL2>(fullscreen, false)};
-    auto secondary_window{std::make_unique<EmuWindow_SDL2>(false, true)};
-    secondary_window->SetTouchState(emu_window->CreateTouchState());
+    std::unique_ptr<EmuWindow_SDL2> emu_window{std::make_unique<EmuWindow_SDL2>(fullscreen, false)};
+    emu_window->CreateTouchState();
+
+    auto secondary_window = [&]() -> std::unique_ptr<EmuWindow_SDL2> {
+        const bool use_secondary_window{Settings::values.layout_option ==
+                                        Settings::LayoutOption::SeparateWindows};
+        if (!use_secondary_window) {
+            return nullptr;
+        }
+        auto secondary_window{std::make_unique<EmuWindow_SDL2>(false, true)};
+        secondary_window->SetTouchState(emu_window->GetTouchState());
+        return secondary_window;
+    }();
 
     Frontend::ScopeAcquireContext scope(*emu_window);
 
@@ -374,7 +384,7 @@ int main(int argc, char** argv) {
 
     Core::System& system = Core::System::GetInstance();
     const Core::System::ResultStatus load_result{
-        system.Load(*emu_window, *secondary_window, filepath)};
+        system.Load(*emu_window, filepath, secondary_window.get())};
 
     switch (load_result) {
     case Core::System::ResultStatus::ErrorGetLoader:
@@ -444,7 +454,7 @@ int main(int argc, char** argv) {
 
     std::thread main_render_thread([&emu_window] { emu_window->Present(); });
     std::thread secondary_render_thread([&secondary_window] {
-        if (Settings::values.layout_option == Settings::LayoutOption::SeparateWindows) {
+        if (secondary_window) {
             secondary_window->Present();
         }
     });
@@ -456,7 +466,11 @@ int main(int argc, char** argv) {
                       total);
         });
 
-    while (emu_window->IsOpen() && secondary_window->IsOpen()) {
+    const auto secondary_is_open = [&secondary_window] {
+        // if the secondary window isn't created, it shouldn't affect the main loop
+        return secondary_window ? secondary_window->IsOpen() : true;
+    };
+    while (emu_window->IsOpen() && secondary_is_open()) {
         const auto result = system.RunLoop();
 
         switch (result) {
@@ -469,8 +483,9 @@ int main(int argc, char** argv) {
         }
     }
     emu_window->RequestClose();
-    secondary_window->RequestClose();
-
+    if (secondary_window) {
+        secondary_window->RequestClose();
+    }
     main_render_thread.join();
     secondary_render_thread.join();
 

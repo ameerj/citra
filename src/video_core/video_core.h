@@ -54,7 +54,7 @@ enum class ResultStatus {
 };
 
 /// Initialize the video core
-ResultStatus Init(Frontend::EmuWindow& emu_window, Frontend::EmuWindow& secondary_window,
+ResultStatus Init(Frontend::EmuWindow& emu_window, Frontend::EmuWindow* secondary_window,
                   Memory::MemorySystem& memory);
 
 /// Shutdown the video core

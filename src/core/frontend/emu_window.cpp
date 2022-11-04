@@ -104,10 +104,9 @@ std::tuple<unsigned, unsigned> EmuWindow::ClipToTouchScreen(unsigned new_x, unsi
     return std::make_tuple(new_x, new_y);
 }
 
-std::shared_ptr<EmuWindow::TouchState> EmuWindow::CreateTouchState() {
+void EmuWindow::CreateTouchState() {
     touch_state = std::make_shared<TouchState>();
     Input::RegisterFactory<Input::TouchDevice>("emu_window", touch_state);
-    return touch_state;
 }
 
 bool EmuWindow::TouchPressed(unsigned framebuffer_x, unsigned framebuffer_y) {

@@ -125,7 +125,11 @@ public:
     virtual void RestoreContext(){};
 
     class TouchState;
-    std::shared_ptr<TouchState> CreateTouchState();
+    void CreateTouchState();
+
+    std::shared_ptr<TouchState> GetTouchState() {
+        return touch_state;
+    }
 
     void SetTouchState(std::shared_ptr<TouchState> other) {
         touch_state = std::move(other);

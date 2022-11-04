@@ -352,11 +352,13 @@ static std::array<GLfloat, 3 * 2> MakeOrthographicMatrix(const float width, cons
     return matrix;
 }
 
-RendererOpenGL::RendererOpenGL(Frontend::EmuWindow& window, Frontend::EmuWindow& secondary_window)
+RendererOpenGL::RendererOpenGL(Frontend::EmuWindow& window, Frontend::EmuWindow* secondary_window)
     : RendererBase{window, secondary_window},
       frame_dumper(Core::System::GetInstance().VideoDumper(), window) {
     window.mailbox = std::make_unique<OGLTextureMailbox>();
-    secondary_window.mailbox = std::make_unique<OGLTextureMailbox>();
+    if (secondary_window) {
+        secondary_window->mailbox = std::make_unique<OGLTextureMailbox>();
+    }
     frame_dumper.mailbox = std::make_unique<OGLVideoDumpingMailbox>();
 }
 
@@ -379,8 +381,10 @@ void RendererOpenGL::SwapBuffers() {
     RenderToMailbox(main_layout, render_window.mailbox, false);
 
     if (Settings::values.layout_option == Settings::LayoutOption::SeparateWindows) {
-        const auto& secondary_layout = secondary_window.GetFramebufferLayout();
-        RenderToMailbox(secondary_layout, secondary_window.mailbox, false);
+        ASSERT(secondary_window);
+        const auto& secondary_layout = secondary_window->GetFramebufferLayout();
+        RenderToMailbox(secondary_layout, secondary_window->mailbox, false);
+        secondary_window->PollEvents();
     }
     if (frame_dumper.IsDumping()) {
         try {
@@ -395,7 +399,6 @@ void RendererOpenGL::SwapBuffers() {
     Core::System::GetInstance().perf_stats->EndSystemFrame();
 
     render_window.PollEvents();
-    secondary_window.PollEvents();
 
     Core::System::GetInstance().frame_limiter.DoFrameLimiting(
         Core::System::GetInstance().CoreTiming().GetGlobalTimeUs());
@@ -1117,7 +1120,7 @@ void RendererOpenGL::DrawScreens(const Layout::FramebufferLayout& layout, bool f
 }
 
 void RendererOpenGL::TryPresent(int timeout_ms, bool is_secondary) {
-    const auto& window = is_secondary ? secondary_window : render_window;
+    const auto& window = is_secondary ? *secondary_window : render_window;
     const auto& layout = window.GetFramebufferLayout();
     auto frame = window.mailbox->TryGetPresentFrame(timeout_ms);
     if (!frame) {

@@ -254,9 +254,10 @@ void GMainWindow::InitializeWidgets() {
     render_window = new GRenderWindow(this, emu_thread.get(), false);
     secondary_window = new GRenderWindow(this, emu_thread.get(), true);
     render_window->hide();
+    render_window->CreateTouchState();
     secondary_window->hide();
     secondary_window->setParent(nullptr);
-    secondary_window->SetTouchState(render_window->CreateTouchState());
+    secondary_window->SetTouchState(render_window->GetTouchState());
 
     game_list = new GameList(this);
     ui->horizontalLayout->addWidget(game_list);
@@ -945,7 +946,7 @@ bool GMainWindow::LoadROM(const QString& filename) {
     Core::System& system{Core::System::GetInstance()};
 
     const Core::System::ResultStatus result{
-        system.Load(*render_window, *secondary_window, filename.toStdString())};
+        system.Load(*render_window, filename.toStdString(), secondary_window)};
 
     if (result != Core::System::ResultStatus::Success) {
         switch (result) {

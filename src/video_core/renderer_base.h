@@ -15,7 +15,7 @@ class EmuWindow;
 
 class RendererBase : NonCopyable {
 public:
-    explicit RendererBase(Frontend::EmuWindow& window, Frontend::EmuWindow& secondary_window);
+    explicit RendererBase(Frontend::EmuWindow& window, Frontend::EmuWindow* secondary_window);
     virtual ~RendererBase();
 
     /// Initialize the renderer
@@ -68,7 +68,7 @@ public:
 
 protected:
     Frontend::EmuWindow& render_window;    ///< Reference to the render window handle.
-    Frontend::EmuWindow& secondary_window; ///< Reference to the secondary render window handle.
+    Frontend::EmuWindow* secondary_window; ///< Reference to the secondary render window handle.
     std::unique_ptr<VideoCore::RasterizerInterface> rasterizer;
     f32 m_current_fps = 0.0f; ///< Current framerate, should be set by the renderer
     int m_current_frame = 0;  ///< Current frame, should be set by the renderer

@@ -56,7 +56,7 @@ struct PresentationTexture {
 
 class RendererOpenGL : public RendererBase {
 public:
-    explicit RendererOpenGL(Frontend::EmuWindow& window, Frontend::EmuWindow& secondary_window);
+    explicit RendererOpenGL(Frontend::EmuWindow& window, Frontend::EmuWindow* secondary_window);
     ~RendererOpenGL() override;
 
     /// Initialize the renderer
