@@ -251,11 +251,12 @@ void GMainWindow::InitializeWidgets() {
 #ifdef CITRA_ENABLE_COMPATIBILITY_REPORTING
     ui->action_Report_Compatibility->setVisible(true);
 #endif
-    secondary_window = new GRenderWindow(this, emu_thread.get(), true);
     render_window = new GRenderWindow(this, emu_thread.get(), false);
+    secondary_window = new GRenderWindow(this, emu_thread.get(), true);
     render_window->hide();
     secondary_window->hide();
     secondary_window->setParent(nullptr);
+    secondary_window->SetTouchState(render_window->CreateTouchState());
 
     game_list = new GameList(this);
     ui->horizontalLayout->addWidget(game_list);

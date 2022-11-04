@@ -4,7 +4,6 @@
 
 #include <cmath>
 #include <mutex>
-#include "core/3ds.h"
 #include "core/frontend/emu_window.h"
 #include "core/frontend/input.h"
 #include "core/settings.h"
@@ -44,19 +43,13 @@ private:
     };
 };
 
-EmuWindow::EmuWindow(bool is_secondary_) : is_secondary{is_secondary_} {
-    // TODO: Find a better place to set this.
-    config.min_client_area_size =
-        std::make_pair(Core::kScreenTopWidth, Core::kScreenTopHeight + Core::kScreenBottomHeight);
-    active_config = config;
-    touch_state = std::make_shared<TouchState>();
-    Input::RegisterFactory<Input::TouchDevice>("emu_window", touch_state);
-}
+EmuWindow::EmuWindow() {
+    CreateTouchState();
+};
 
-EmuWindow::~EmuWindow() {
-    Input::UnregisterFactory<Input::TouchDevice>("emu_window");
-}
+EmuWindow::EmuWindow(bool is_secondary_) : is_secondary{is_secondary_} {}
 
+EmuWindow::~EmuWindow() = default;
 /**
  * Check if the given x/y coordinates are within the touchpad specified by the framebuffer layout
  * @param layout FramebufferLayout object describing the framebuffer size and screen positions
@@ -109,6 +102,12 @@ std::tuple<unsigned, unsigned> EmuWindow::ClipToTouchScreen(unsigned new_x, unsi
     new_y = std::min(new_y, framebuffer_layout.bottom_screen.bottom - 1);
 
     return std::make_tuple(new_x, new_y);
+}
+
+std::shared_ptr<EmuWindow::TouchState> EmuWindow::CreateTouchState() {
+    touch_state = std::make_shared<TouchState>();
+    Input::RegisterFactory<Input::TouchDevice>("emu_window", touch_state);
+    return touch_state;
 }
 
 bool EmuWindow::TouchPressed(unsigned framebuffer_x, unsigned framebuffer_y) {

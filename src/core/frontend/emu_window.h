@@ -7,7 +7,9 @@
 #include <memory>
 #include <tuple>
 #include <utility>
+
 #include "common/common_types.h"
+#include "core/3ds.h"
 #include "core/frontend/framebuffer_layout.h"
 
 namespace Frontend {
@@ -92,7 +94,8 @@ public:
         bool fullscreen = false;
         int res_width = 0;
         int res_height = 0;
-        std::pair<unsigned, unsigned> min_client_area_size;
+        std::pair<unsigned, unsigned> min_client_area_size{
+            Core::kScreenTopWidth, Core::kScreenTopHeight + Core::kScreenBottomHeight};
     };
 
     /// Polls window events
@@ -120,6 +123,13 @@ public:
      * Restore saved GraphicsContext.
      */
     virtual void RestoreContext(){};
+
+    class TouchState;
+    std::shared_ptr<TouchState> CreateTouchState();
+
+    void SetTouchState(std::shared_ptr<TouchState> other) {
+        touch_state = std::move(other);
+    }
 
     /**
      * Signal that a touch pressed event has occurred (e.g. mouse click pressed)
@@ -176,6 +186,7 @@ public:
     std::unique_ptr<TextureMailbox> mailbox = nullptr;
 
 protected:
+    EmuWindow();
     EmuWindow(bool is_secondary);
     virtual ~EmuWindow();
 
@@ -218,11 +229,10 @@ private:
 
     Layout::FramebufferLayout framebuffer_layout; ///< Current framebuffer layout
 
-    WindowConfig config;        ///< Internal configuration (changes pending for being applied in
-                                /// ProcessConfigurationChanges)
-    WindowConfig active_config; ///< Internal active configuration
+    WindowConfig config{};        ///< Internal configuration (changes pending for being applied in
+                                  /// ProcessConfigurationChanges)
+    WindowConfig active_config{}; ///< Internal active configuration
 
-    class TouchState;
     std::shared_ptr<TouchState> touch_state;
 
     /**

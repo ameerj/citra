@@ -362,8 +362,10 @@ int main(int argc, char** argv) {
 
     EmuWindow_SDL2::InitializeSDL2();
 
-    auto secondary_window{std::make_unique<EmuWindow_SDL2>(fullscreen, true)};
     auto emu_window{std::make_unique<EmuWindow_SDL2>(fullscreen, false)};
+    auto secondary_window{std::make_unique<EmuWindow_SDL2>(false, true)};
+    secondary_window->SetTouchState(emu_window->CreateTouchState());
+
     Frontend::ScopeAcquireContext scope(*emu_window);
 
     LOG_INFO(Frontend, "Citra Version: {} | {}-{}", Common::g_build_fullname, Common::g_scm_branch,
@@ -441,7 +443,11 @@ int main(int argc, char** argv) {
     }
 
     std::thread main_render_thread([&emu_window] { emu_window->Present(); });
-    std::thread secondary_render_thread([&secondary_window] { secondary_window->Present(); });
+    std::thread secondary_render_thread([&secondary_window] {
+        if (Settings::values.layout_option == Settings::LayoutOption::SeparateWindows) {
+            secondary_window->Present();
+        }
+    });
 
     std::atomic_bool stop_run;
     system.Renderer().Rasterizer()->LoadDiskResources(
