@@ -89,6 +89,8 @@ public:
  */
 class EmuWindow : public GraphicsContext {
 public:
+    class TouchState;
+
     /// Data structure to store emuwindow configuration
     struct WindowConfig {
         bool fullscreen = false;
@@ -123,17 +125,6 @@ public:
      * Restore saved GraphicsContext.
      */
     virtual void RestoreContext(){};
-
-    class TouchState;
-    void CreateTouchState();
-
-    std::shared_ptr<TouchState> GetTouchState() {
-        return touch_state;
-    }
-
-    void SetTouchState(std::shared_ptr<TouchState> other) {
-        touch_state = std::move(other);
-    }
 
     /**
      * Signal that a touch pressed event has occurred (e.g. mouse click pressed)
@@ -230,6 +221,8 @@ private:
     virtual void OnMinimalClientAreaChangeRequest(std::pair<u32, u32> minimal_size) {
         // By default, ignore this request and do nothing.
     }
+
+    void CreateTouchState();
 
     Layout::FramebufferLayout framebuffer_layout; ///< Current framebuffer layout
 

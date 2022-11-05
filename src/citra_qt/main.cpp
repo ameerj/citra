@@ -254,10 +254,8 @@ void GMainWindow::InitializeWidgets() {
     render_window = new GRenderWindow(this, emu_thread.get(), false);
     secondary_window = new GRenderWindow(this, emu_thread.get(), true);
     render_window->hide();
-    render_window->CreateTouchState();
     secondary_window->hide();
     secondary_window->setParent(nullptr);
-    secondary_window->SetTouchState(render_window->GetTouchState());
 
     game_list = new GameList(this);
     ui->horizontalLayout->addWidget(game_list);

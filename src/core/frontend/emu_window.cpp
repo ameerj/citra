@@ -9,6 +9,8 @@
 #include "core/settings.h"
 
 namespace Frontend {
+/// We need a global touch state that is shared across the different window instances
+static std::weak_ptr<EmuWindow::TouchState> global_touch_state;
 
 GraphicsContext::~GraphicsContext() = default;
 
@@ -47,7 +49,9 @@ EmuWindow::EmuWindow() {
     CreateTouchState();
 };
 
-EmuWindow::EmuWindow(bool is_secondary_) : is_secondary{is_secondary_} {}
+EmuWindow::EmuWindow(bool is_secondary_) : is_secondary{is_secondary_} {
+    CreateTouchState();
+}
 
 EmuWindow::~EmuWindow() = default;
 /**
@@ -105,8 +109,12 @@ std::tuple<unsigned, unsigned> EmuWindow::ClipToTouchScreen(unsigned new_x, unsi
 }
 
 void EmuWindow::CreateTouchState() {
+    if (touch_state = global_touch_state.lock()) {
+        return;
+    }
     touch_state = std::make_shared<TouchState>();
     Input::RegisterFactory<Input::TouchDevice>("emu_window", touch_state);
+    global_touch_state = touch_state;
 }
 
 bool EmuWindow::TouchPressed(unsigned framebuffer_x, unsigned framebuffer_y) {

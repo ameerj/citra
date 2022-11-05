@@ -362,19 +362,11 @@ int main(int argc, char** argv) {
 
     EmuWindow_SDL2::InitializeSDL2();
 
-    std::unique_ptr<EmuWindow_SDL2> emu_window{std::make_unique<EmuWindow_SDL2>(fullscreen, false)};
-    emu_window->CreateTouchState();
-
-    auto secondary_window = [&]() -> std::unique_ptr<EmuWindow_SDL2> {
-        const bool use_secondary_window{Settings::values.layout_option ==
-                                        Settings::LayoutOption::SeparateWindows};
-        if (!use_secondary_window) {
-            return nullptr;
-        }
-        auto secondary_window{std::make_unique<EmuWindow_SDL2>(false, true)};
-        secondary_window->SetTouchState(emu_window->GetTouchState());
-        return secondary_window;
-    }();
+    const auto emu_window{std::make_unique<EmuWindow_SDL2>(fullscreen, false)};
+    const bool use_secondary_window{Settings::values.layout_option ==
+                                    Settings::LayoutOption::SeparateWindows};
+    const auto secondary_window =
+        use_secondary_window ? std::make_unique<EmuWindow_SDL2>(false, true) : nullptr;
 
     Frontend::ScopeAcquireContext scope(*emu_window);
 
