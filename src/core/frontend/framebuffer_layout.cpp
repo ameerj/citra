@@ -377,7 +377,9 @@ FramebufferLayout FrameLayoutFromResolutionScale(u32 res_scale) {
         int width, height;
         switch (Settings::values.layout_option) {
         case Settings::LayoutOption::SingleScreen:
+#ifndef ANDROID
         case Settings::LayoutOption::SeparateWindows:
+#endif
             if (Settings::values.upright_screen) {
                 if (Settings::values.swap_screen) {
                     width = Core::kScreenBottomHeight * res_scale;
@@ -395,13 +397,8 @@ FramebufferLayout FrameLayoutFromResolutionScale(u32 res_scale) {
                     height = Core::kScreenTopHeight * res_scale;
                 }
             }
-            if (Settings::values.layout_option == Settings::LayoutOption::SeparateWindows) {
-                layout = SeparateWindowsLayout(width, height, Settings::values.swap_screen,
-                                               Settings::values.upright_screen);
-            } else {
-                layout = SingleFrameLayout(width, height, Settings::values.swap_screen,
-                                           Settings::values.upright_screen);
-            }
+            layout = SingleFrameLayout(width, height, Settings::values.swap_screen,
+                                       Settings::values.upright_screen);
             break;
         case Settings::LayoutOption::LargeScreen:
             if (Settings::values.upright_screen) {
@@ -557,7 +554,9 @@ std::pair<unsigned, unsigned> GetMinimumSizeFromLayout(Settings::LayoutOption la
 
     switch (layout) {
     case Settings::LayoutOption::SingleScreen:
+#ifndef ANDROID
     case Settings::LayoutOption::SeparateWindows:
+#endif
         min_width = Settings::values.swap_screen ? Core::kScreenBottomWidth : Core::kScreenTopWidth;
         min_height = Core::kScreenBottomHeight;
         break;

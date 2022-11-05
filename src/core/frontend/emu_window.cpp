@@ -200,10 +200,12 @@ void EmuWindow::UpdateCurrentFramebufferLayout(unsigned width, unsigned height,
             layout = Layout::SideFrameLayout(width, height, Settings::values.swap_screen,
                                              Settings::values.upright_screen);
             break;
+#ifndef ANDROID
         case Settings::LayoutOption::SeparateWindows:
             layout = Layout::SeparateWindowsLayout(width, height, is_secondary,
                                                    Settings::values.upright_screen);
             break;
+#endif
         case Settings::LayoutOption::MobilePortrait:
             layout = Layout::MobilePortraitFrameLayout(width, height, Settings::values.swap_screen);
             break;

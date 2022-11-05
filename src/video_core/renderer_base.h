@@ -30,6 +30,9 @@ public:
     /// Draws the latest frame to the window waiting timeout_ms for a frame to arrive (Renderer
     /// specific implementation)
     virtual void TryPresent(int timeout_ms, bool is_secondary) = 0;
+    virtual void TryPresent(int timeout_ms) {
+        TryPresent(timeout_ms, false);
+    }
 
     /// Prepares for video dumping (e.g. create necessary buffers, etc)
     virtual void PrepareVideoDumping() = 0;
