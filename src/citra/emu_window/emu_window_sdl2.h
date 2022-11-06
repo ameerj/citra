@@ -32,7 +32,9 @@ public:
     explicit EmuWindow_SDL2(bool fullscreen);
     ~EmuWindow_SDL2();
 
-    void Present();
+    static void InitializeSDL2();
+
+    void Present(bool is_secondary);
 
     /// Polls window events
     void PollEvents() override;
@@ -93,6 +95,9 @@ private:
 
     /// Internal SDL2 render window
     SDL_Window* render_window;
+
+    /// Internal SDL2 window ID
+    int render_window_id{};
 
     /// Fake hidden window for the core context
     SDL_Window* dummy_window;

@@ -198,7 +198,7 @@ FramebufferLayout SingleFrameLayout(u32 width, u32 height, bool swapped, bool up
     ASSERT(height > 0);
     // The drawing code needs at least somewhat valid values for both screens
     // so just calculate them both even if the other isn't showing.
-    FramebufferLayout res{width, height, !swapped, swapped, {}, {}, !upright};
+    FramebufferLayout res{width, height, true, true, {}, {}, !upright};
 
     Common::Rectangle<u32> screen_window_area{0, 0, width, height};
     Common::Rectangle<u32> top_screen;
@@ -370,6 +370,7 @@ FramebufferLayout FrameLayoutFromResolutionScale(u32 res_scale) {
         int width, height;
         switch (Settings::values.layout_option) {
         case Settings::LayoutOption::SingleScreen:
+        case Settings::LayoutOption::SeparateWindows:
             if (Settings::values.upright_screen) {
                 if (Settings::values.swap_screen) {
                     width = Core::kScreenBottomHeight * res_scale;
@@ -544,6 +545,7 @@ std::pair<unsigned, unsigned> GetMinimumSizeFromLayout(Settings::LayoutOption la
 
     switch (layout) {
     case Settings::LayoutOption::SingleScreen:
+    case Settings::LayoutOption::SeparateWindows:
         min_width = Settings::values.swap_screen ? Core::kScreenBottomWidth : Core::kScreenTopWidth;
         min_height = Core::kScreenBottomHeight;
         break;

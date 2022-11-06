@@ -137,16 +137,6 @@ void EmuWindow_SDL2::Fullscreen() {
 
 EmuWindow_SDL2::EmuWindow_SDL2(bool fullscreen) {
     // Initialize the window
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER) < 0) {
-        LOG_CRITICAL(Frontend, "Failed to initialize SDL2: {}! Exiting...", SDL_GetError());
-        exit(1);
-    }
-
-    InputCommon::Init();
-    Network::Init();
-
-    SDL_SetMainReady();
-
     if (Settings::values.use_gles) {
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
@@ -201,6 +191,7 @@ EmuWindow_SDL2::EmuWindow_SDL2(bool fullscreen) {
         exit(1);
     }
 
+    render_window_id = SDL_GetWindowID(render_window);
     auto gl_load_func = Settings::values.use_gles ? gladLoadGLES2Loader : gladLoadGLLoader;
 
     if (!gl_load_func(static_cast<GLADloadproc>(SDL_GL_GetProcAddress))) {
@@ -211,17 +202,24 @@ EmuWindow_SDL2::EmuWindow_SDL2(bool fullscreen) {
     OnResize();
     OnMinimalClientAreaChangeRequest(GetActiveConfig().min_client_area_size);
     SDL_PumpEvents();
-    LOG_INFO(Frontend, "Citra Version: {} | {}-{}", Common::g_build_fullname, Common::g_scm_branch,
-             Common::g_scm_desc);
-    Settings::LogSettings();
 }
 
 EmuWindow_SDL2::~EmuWindow_SDL2() {
     core_context.reset();
-    Network::Shutdown();
-    InputCommon::Shutdown();
     SDL_GL_DeleteContext(window_context);
     SDL_Quit();
+}
+
+void EmuWindow_SDL2::InitializeSDL2() {
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER) < 0) {
+        LOG_CRITICAL(Frontend, "Failed to initialize SDL2: {}! Exiting...", SDL_GetError());
+        exit(1);
+    }
+
+    InputCommon::Init();
+    Network::Init();
+
+    SDL_SetMainReady();
 }
 
 std::unique_ptr<Frontend::GraphicsContext> EmuWindow_SDL2::CreateSharedContext() const {
@@ -236,11 +234,11 @@ void EmuWindow_SDL2::RestoreContext() {
     SDL_GL_MakeCurrent(render_window, last_saved_context);
 }
 
-void EmuWindow_SDL2::Present() {
+void EmuWindow_SDL2::Present(bool is_secondary) {
     SDL_GL_MakeCurrent(render_window, window_context);
     SDL_GL_SetSwapInterval(1);
     while (IsOpen()) {
-        VideoCore::g_renderer->TryPresent(100);
+        VideoCore::g_renderer->TryPresent(100, is_secondary);
         SDL_GL_SwapWindow(render_window);
     }
     SDL_GL_MakeCurrent(render_window, nullptr);
@@ -248,11 +246,16 @@ void EmuWindow_SDL2::Present() {
 
 void EmuWindow_SDL2::PollEvents() {
     SDL_Event event;
+    std::vector<SDL_Event> other_window_events;
 
     // SDL_PollEvent returns 0 when there are no more events in the event queue
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
         case SDL_WINDOWEVENT:
+            if (event.window.windowID != render_window_id) {
+                other_window_events.push_back(event);
+                continue;
+            }
             switch (event.window.event) {
             case SDL_WINDOWEVENT_SIZE_CHANGED:
             case SDL_WINDOWEVENT_RESIZED:
@@ -309,6 +312,11 @@ void EmuWindow_SDL2::PollEvents() {
                         results.emulation_speed * 100.0f);
         SDL_SetWindowTitle(render_window, title.c_str());
         last_time = current_time;
+    }
+    for (auto& e : other_window_events) {
+        // This is a somewhat hacky workaround to re-emit window events meant for another window
+        // since SDL_PollEvent() is global but we poll events per window.
+        SDL_PushEvent(&e);
     }
 }
 

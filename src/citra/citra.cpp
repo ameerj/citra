@@ -35,6 +35,7 @@
 #include "core/loader/loader.h"
 #include "core/movie.h"
 #include "core/settings.h"
+#include "input_common/main.h"
 #include "network/network.h"
 #include "video_core/renderer_base.h"
 
@@ -359,11 +360,20 @@ int main(int argc, char** argv) {
     // Register generic image interface
     Core::System::GetInstance().RegisterImageInterface(std::make_shared<LodePNGImageInterface>());
 
-    std::unique_ptr<EmuWindow_SDL2> emu_window{std::make_unique<EmuWindow_SDL2>(fullscreen)};
-    Frontend::ScopeAcquireContext scope(*emu_window);
-    Core::System& system = Core::System::GetInstance();
+    EmuWindow_SDL2::InitializeSDL2();
 
-    const Core::System::ResultStatus load_result{system.Load(*emu_window, filepath)};
+    std::unique_ptr<EmuWindow_SDL2> emu_window{std::make_unique<EmuWindow_SDL2>(fullscreen)};
+    std::unique_ptr<EmuWindow_SDL2> secondary_window{std::make_unique<EmuWindow_SDL2>(fullscreen)};
+    Frontend::ScopeAcquireContext scope(*emu_window);
+    Frontend::ScopeAcquireContext scope2(*secondary_window);
+
+    LOG_INFO(Frontend, "Citra Version: {} | {}-{}", Common::g_build_fullname, Common::g_scm_branch,
+             Common::g_scm_desc);
+    Settings::LogSettings();
+
+    Core::System& system = Core::System::GetInstance();
+    const Core::System::ResultStatus load_result{
+        system.Load(*emu_window, *secondary_window, filepath)};
 
     switch (load_result) {
     case Core::System::ResultStatus::ErrorGetLoader:
@@ -431,7 +441,8 @@ int main(int argc, char** argv) {
         system.VideoDumper().StartDumping(dump_video, layout);
     }
 
-    std::thread render_thread([&emu_window] { emu_window->Present(); });
+    std::thread main_render_thread([&emu_window] { emu_window->Present(false); });
+    std::thread secondary_render_thread([&secondary_window] { secondary_window->Present(true); });
 
     std::atomic_bool stop_run;
     system.Renderer().Rasterizer()->LoadDiskResources(
@@ -440,13 +451,11 @@ int main(int argc, char** argv) {
                       total);
         });
 
-    while (emu_window->IsOpen()) {
+    while (emu_window->IsOpen() && secondary_window->IsOpen()) {
         const auto result = system.RunLoop();
 
         switch (result) {
         case Core::System::ResultStatus::ShutdownRequested:
-            emu_window->RequestClose();
-            break;
         case Core::System::ResultStatus::Success:
             break;
         default:
@@ -454,12 +463,19 @@ int main(int argc, char** argv) {
             break;
         }
     }
-    render_thread.join();
+    emu_window->RequestClose();
+    secondary_window->RequestClose();
+
+    main_render_thread.join();
+    secondary_render_thread.join();
 
     Core::Movie::GetInstance().Shutdown();
     if (system.VideoDumper().IsDumping()) {
         system.VideoDumper().StopDumping();
     }
+
+    Network::Shutdown();
+    InputCommon::Shutdown();
 
     system.Shutdown();
 

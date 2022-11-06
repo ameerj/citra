@@ -165,6 +165,9 @@ void EmuWindow::TouchMoved(unsigned framebuffer_x, unsigned framebuffer_y) {
 
 void EmuWindow::UpdateCurrentFramebufferLayout(unsigned width, unsigned height,
                                                bool is_portrait_mode) {
+    if (width == 0 || height == 0) {
+        return;
+    }
     Layout::FramebufferLayout layout;
     const auto layout_option = Settings::values.layout_option;
     const auto min_size =
@@ -183,6 +186,7 @@ void EmuWindow::UpdateCurrentFramebufferLayout(unsigned width, unsigned height,
 
         switch (layout_option) {
         case Settings::LayoutOption::SingleScreen:
+        case Settings::LayoutOption::SeparateWindows:
             layout = Layout::SingleFrameLayout(width, height, Settings::values.swap_screen,
                                                Settings::values.upright_screen);
             break;

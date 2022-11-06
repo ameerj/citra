@@ -352,10 +352,11 @@ static std::array<GLfloat, 3 * 2> MakeOrthographicMatrix(const float width, cons
     return matrix;
 }
 
-RendererOpenGL::RendererOpenGL(Frontend::EmuWindow& window)
-    : RendererBase{window}, frame_dumper(Core::System::GetInstance().VideoDumper(), window) {
-
+RendererOpenGL::RendererOpenGL(Frontend::EmuWindow& window, Frontend::EmuWindow& secondary_window)
+    : RendererBase{window, secondary_window},
+      frame_dumper(Core::System::GetInstance().VideoDumper(), window) {
     window.mailbox = std::make_unique<OGLTextureMailbox>();
+    secondary_window.mailbox = std::make_unique<OGLTextureMailbox>();
     frame_dumper.mailbox = std::make_unique<OGLVideoDumpingMailbox>();
 }
 
@@ -374,8 +375,13 @@ void RendererOpenGL::SwapBuffers() {
 
     RenderScreenshot();
 
-    const auto& layout = render_window.GetFramebufferLayout();
-    RenderToMailbox(layout, render_window.mailbox, false);
+    auto main_layout = render_window.GetFramebufferLayout();
+    main_layout.bottom_screen_enabled = false;
+    RenderToMailbox(main_layout, render_window.mailbox, false);
+
+    auto secondary_layout = secondary_window.GetFramebufferLayout();
+    secondary_layout.top_screen_enabled = false;
+    RenderToMailbox(secondary_layout, secondary_window.mailbox, false);
 
     if (frame_dumper.IsDumping()) {
         try {
@@ -390,6 +396,7 @@ void RendererOpenGL::SwapBuffers() {
     Core::System::GetInstance().perf_stats->EndSystemFrame();
 
     render_window.PollEvents();
+    secondary_window.PollEvents();
 
     Core::System::GetInstance().frame_limiter.DoFrameLimiting(
         Core::System::GetInstance().CoreTiming().GetGlobalTimeUs());
@@ -1110,9 +1117,10 @@ void RendererOpenGL::DrawScreens(const Layout::FramebufferLayout& layout, bool f
     }
 }
 
-void RendererOpenGL::TryPresent(int timeout_ms) {
-    const auto& layout = render_window.GetFramebufferLayout();
-    auto frame = render_window.mailbox->TryGetPresentFrame(timeout_ms);
+void RendererOpenGL::TryPresent(int timeout_ms, bool is_secondary) {
+    const auto& window = is_secondary ? secondary_window : render_window;
+    const auto& layout = window.GetFramebufferLayout();
+    auto frame = window.mailbox->TryGetPresentFrame(timeout_ms);
     if (!frame) {
         LOG_DEBUG(Render_OpenGL, "TryGetPresentFrame returned no frame to present");
         return;
@@ -1125,7 +1133,7 @@ void RendererOpenGL::TryPresent(int timeout_ms) {
     // Recreate the presentation FBO if the color attachment was changed
     if (frame->color_reloaded) {
         LOG_DEBUG(Render_OpenGL, "Reloading present frame");
-        render_window.mailbox->ReloadPresentFrame(frame, layout.width, layout.height);
+        window.mailbox->ReloadPresentFrame(frame, layout.width, layout.height);
     }
     glWaitSync(frame->render_fence, 0, GL_TIMEOUT_IGNORED);
     // INTEL workaround.
