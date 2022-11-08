@@ -197,6 +197,7 @@ private slots:
     void OnDisplayTitleBars(bool);
     void InitializeHotkeys();
     void ToggleFullscreen();
+    void ToggleSecondaryFullscreen();
     void ChangeScreenLayout();
     void UpdateSecondaryWindowVisibility();
     void ToggleScreenLayout();

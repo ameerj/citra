@@ -516,6 +516,17 @@ void GMainWindow::InitializeHotkeys() {
             &QShortcut::activated, ui->action_Fullscreen, &QAction::trigger);
     connect(hotkey_registry.GetHotkey(main_window, fullscreen, render_window),
             &QShortcut::activatedAmbiguously, ui->action_Fullscreen, &QAction::trigger);
+
+    // This action will fire specifically when secondary_window is in focus
+    QAction* secondary_fullscreen_action = new QAction(secondary_window);
+    // Use the same fullscreen hotkey as the main window
+    const auto fullscreen_hotkey = hotkey_registry.GetKeySequence(main_window, fullscreen);
+    secondary_fullscreen_action->setShortcut(fullscreen_hotkey);
+
+    connect(secondary_fullscreen_action, SIGNAL(triggered()), this,
+            SLOT(ToggleSecondaryFullscreen()));
+    secondary_window->addAction(secondary_fullscreen_action);
+
     connect(hotkey_registry.GetHotkey(main_window, QStringLiteral("Exit Fullscreen"), this),
             &QShortcut::activated, this, [&] {
                 if (emulation_running) {
@@ -1671,6 +1682,17 @@ void GMainWindow::ToggleFullscreen() {
         ShowFullscreen();
     } else {
         HideFullscreen();
+    }
+}
+
+void GMainWindow::ToggleSecondaryFullscreen() {
+    if (!emulation_running) {
+        return;
+    }
+    if (secondary_window->isFullScreen()) {
+        secondary_window->showNormal();
+    } else {
+        secondary_window->showFullScreen();
     }
 }
 
