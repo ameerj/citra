@@ -302,21 +302,13 @@ void EmuWindow_SDL2::PollEvents() {
             break;
         }
     }
-
-    const u32 current_time = SDL_GetTicks();
-    if (current_time > last_time + 2000) {
-        const auto results = Core::System::GetInstance().GetAndResetPerfStats();
-        const auto title =
-            fmt::format("Citra {} | {}-{} | FPS: {:.0f} ({:.0f}%)", Common::g_build_fullname,
-                        Common::g_scm_branch, Common::g_scm_desc, results.game_fps,
-                        results.emulation_speed * 100.0f);
-        SDL_SetWindowTitle(render_window, title.c_str());
-        last_time = current_time;
-    }
     for (auto& e : other_window_events) {
         // This is a somewhat hacky workaround to re-emit window events meant for another window
         // since SDL_PollEvent() is global but we poll events per window.
         SDL_PushEvent(&e);
+    }
+    if (!is_secondary) {
+        UpdateFramerateCounter();
     }
 }
 
@@ -330,4 +322,17 @@ void EmuWindow_SDL2::DoneCurrent() {
 
 void EmuWindow_SDL2::OnMinimalClientAreaChangeRequest(std::pair<u32, u32> minimal_size) {
     SDL_SetWindowMinimumSize(render_window, minimal_size.first, minimal_size.second);
+}
+
+void EmuWindow_SDL2::UpdateFramerateCounter() {
+    const u32 current_time = SDL_GetTicks();
+    if (current_time > last_time + 2000) {
+        const auto results = Core::System::GetInstance().GetAndResetPerfStats();
+        const auto title =
+            fmt::format("Citra {} | {}-{} | FPS: {:.0f} ({:.0f}%)", Common::g_build_fullname,
+                        Common::g_scm_branch, Common::g_scm_desc, results.game_fps,
+                        results.emulation_speed * 100.0f);
+        SDL_SetWindowTitle(render_window, title.c_str());
+        last_time = current_time;
+    }
 }

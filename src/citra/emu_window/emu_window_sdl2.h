@@ -90,6 +90,9 @@ private:
     /// Called when a configuration change affects the minimal size of the window
     void OnMinimalClientAreaChangeRequest(std::pair<u32, u32> minimal_size) override;
 
+    /// Called when polling to update framerate
+    void UpdateFramerateCounter();
+
     /// Is the window still open?
     bool is_open = true;
 
