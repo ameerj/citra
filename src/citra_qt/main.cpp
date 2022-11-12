@@ -2041,7 +2041,9 @@ void GMainWindow::OnCaptureScreenshot() {
     const QString timestamp =
         QDateTime::currentDateTime().toString(QStringLiteral("dd.MM.yy_hh.mm.ss.z"));
     path.append(QStringLiteral("/%1_%2.png").arg(filename, timestamp));
-    render_window->CaptureScreenshot(UISettings::values.screenshot_resolution_factor, path);
+
+    auto* const screenshot_window = secondary_window->HasFocus() ? secondary_window : render_window;
+    screenshot_window->CaptureScreenshot(UISettings::values.screenshot_resolution_factor, path);
     OnStartGame();
 }
 

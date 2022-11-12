@@ -121,7 +121,7 @@ FramebufferLayout CustomFrameLayout(u32 width, u32 height);
  * Read from the current settings to determine which layout to use.
  * @param res_scale resolution scale factor
  */
-FramebufferLayout FrameLayoutFromResolutionScale(u32 res_scale);
+FramebufferLayout FrameLayoutFromResolutionScale(u32 res_scale, bool is_secondary = false);
 
 /**
  * Convenience method for transforming a frame layout when using Cardboard VR

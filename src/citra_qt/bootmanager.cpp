@@ -198,7 +198,7 @@ void OpenGLWindow::exposeEvent(QExposeEvent* event) {
 }
 
 GRenderWindow::GRenderWindow(QWidget* parent_, EmuThread* emu_thread, bool is_secondary_)
-    : QWidget(parent_), emu_thread(emu_thread), EmuWindow(is_secondary_) {
+    : QWidget(parent_), EmuWindow(is_secondary_), emu_thread(emu_thread) {
 
     setWindowTitle(QStringLiteral("Citra %1 | %2-%3")
                        .arg(QString::fromUtf8(Common::g_build_name),
@@ -380,6 +380,12 @@ bool GRenderWindow::event(QEvent* event) {
 void GRenderWindow::focusOutEvent(QFocusEvent* event) {
     QWidget::focusOutEvent(event);
     InputCommon::GetKeyboard()->ReleaseAllKeys();
+    has_focus = false;
+}
+
+void GRenderWindow::focusInEvent(QFocusEvent* event) {
+    QWidget::focusInEvent(event);
+    has_focus = true;
 }
 
 void GRenderWindow::resizeEvent(QResizeEvent* event) {
@@ -420,7 +426,7 @@ void GRenderWindow::ReleaseRenderTarget() {
 void GRenderWindow::CaptureScreenshot(u32 res_scale, const QString& screenshot_path) {
     if (res_scale == 0)
         res_scale = VideoCore::GetResolutionScaleFactor();
-    const Layout::FramebufferLayout layout{Layout::FrameLayoutFromResolutionScale(res_scale)};
+    const auto layout{Layout::FrameLayoutFromResolutionScale(res_scale, is_secondary)};
     screenshot_image = QImage(QSize(layout.width, layout.height), QImage::Format_RGB32);
     VideoCore::RequestScreenshot(
         screenshot_image.bits(),

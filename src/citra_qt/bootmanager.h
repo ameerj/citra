@@ -180,6 +180,10 @@ public:
     bool event(QEvent* event) override;
 
     void focusOutEvent(QFocusEvent* event) override;
+    void focusInEvent(QFocusEvent* event) override;
+    bool HasFocus() const {
+        return has_focus;
+    }
 
     void InitRenderTarget();
 
@@ -231,6 +235,7 @@ private:
     /// Temporary storage of the screenshot taken
     QImage screenshot_image;
     bool first_frame = false;
+    bool has_focus = false;
 
 protected:
     void showEvent(QShowEvent* event) override;

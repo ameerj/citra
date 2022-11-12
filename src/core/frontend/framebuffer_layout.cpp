@@ -367,7 +367,7 @@ FramebufferLayout CustomFrameLayout(u32 width, u32 height) {
     return res;
 }
 
-FramebufferLayout FrameLayoutFromResolutionScale(u32 res_scale) {
+FramebufferLayout FrameLayoutFromResolutionScale(u32 res_scale, bool is_secondary) {
     FramebufferLayout layout;
     if (Settings::values.custom_layout == true) {
         layout = CustomFrameLayout(
@@ -380,8 +380,10 @@ FramebufferLayout FrameLayoutFromResolutionScale(u32 res_scale) {
 #ifndef ANDROID
         case Settings::LayoutOption::SeparateWindows:
 #endif
+        {
+            const bool swap_screens = is_secondary || Settings::values.swap_screen;
             if (Settings::values.upright_screen) {
-                if (Settings::values.swap_screen) {
+                if (swap_screens) {
                     width = Core::kScreenBottomHeight * res_scale;
                     height = Core::kScreenBottomWidth * res_scale;
                 } else {
@@ -389,7 +391,7 @@ FramebufferLayout FrameLayoutFromResolutionScale(u32 res_scale) {
                     height = Core::kScreenTopWidth * res_scale;
                 }
             } else {
-                if (Settings::values.swap_screen) {
+                if (swap_screens) {
                     width = Core::kScreenBottomWidth * res_scale;
                     height = Core::kScreenBottomHeight * res_scale;
                 } else {
@@ -397,9 +399,10 @@ FramebufferLayout FrameLayoutFromResolutionScale(u32 res_scale) {
                     height = Core::kScreenTopHeight * res_scale;
                 }
             }
-            layout = SingleFrameLayout(width, height, Settings::values.swap_screen,
-                                       Settings::values.upright_screen);
+            layout =
+                SingleFrameLayout(width, height, swap_screens, Settings::values.upright_screen);
             break;
+        }
         case Settings::LayoutOption::LargeScreen:
             if (Settings::values.upright_screen) {
                 if (Settings::values.swap_screen) {
