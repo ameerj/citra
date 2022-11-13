@@ -1239,8 +1239,9 @@ VideoCore::ResultStatus RendererOpenGL::Init() {
 
     // Qualcomm has some spammy info messages that are marked as errors but not important
     // https://developer.qualcomm.com/comment/11845
-    if (GLAD_GL_KHR_debug) {
+    if (Settings::values.graphics_debug && GLAD_GL_KHR_debug) {
         glEnable(GL_DEBUG_OUTPUT);
+        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
         glDebugMessageCallback(DebugHandler, nullptr);
     }
 #endif

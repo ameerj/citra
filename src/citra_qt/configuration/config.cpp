@@ -492,6 +492,7 @@ void Config::ReadRendererValues() {
     Settings::values.shaders_accurate_mul =
         ReadSetting(QStringLiteral("shaders_accurate_mul"), true).toBool();
     Settings::values.use_shader_jit = ReadSetting(QStringLiteral("use_shader_jit"), true).toBool();
+    Settings::values.graphics_debug = ReadSetting(QStringLiteral("graphics_debug"), false).toBool();
     Settings::values.use_disk_shader_cache =
         ReadSetting(QStringLiteral("use_disk_shader_cache"), true).toBool();
     Settings::values.use_vsync_new = ReadSetting(QStringLiteral("use_vsync_new"), true).toBool();
@@ -1002,6 +1003,7 @@ void Config::SaveRendererValues() {
     WriteSetting(QStringLiteral("shaders_accurate_mul"), Settings::values.shaders_accurate_mul,
                  true);
     WriteSetting(QStringLiteral("use_shader_jit"), Settings::values.use_shader_jit, true);
+    WriteSetting(QStringLiteral("graphics_debug"), Settings::values.graphics_debug, false);
     WriteSetting(QStringLiteral("use_disk_shader_cache"), Settings::values.use_disk_shader_cache,
                  true);
     WriteSetting(QStringLiteral("use_vsync_new"), Settings::values.use_vsync_new, true);

@@ -67,6 +67,7 @@ void ConfigureGraphics::SetConfiguration() {
     ui->toggle_separable_shader->setChecked(Settings::values.separable_shader);
     ui->toggle_accurate_mul->setChecked(Settings::values.shaders_accurate_mul);
     ui->toggle_shader_jit->setChecked(Settings::values.use_shader_jit);
+    ui->toggle_graphics_debug->setChecked(Settings::values.graphics_debug);
     ui->toggle_disk_shader_cache->setChecked(Settings::values.use_disk_shader_cache);
     ui->toggle_vsync_new->setChecked(Settings::values.use_vsync_new);
 }
@@ -77,6 +78,7 @@ void ConfigureGraphics::ApplyConfiguration() {
     Settings::values.separable_shader = ui->toggle_separable_shader->isChecked();
     Settings::values.shaders_accurate_mul = ui->toggle_accurate_mul->isChecked();
     Settings::values.use_shader_jit = ui->toggle_shader_jit->isChecked();
+    Settings::values.graphics_debug = ui->toggle_graphics_debug->isChecked();
     Settings::values.use_disk_shader_cache = ui->toggle_disk_shader_cache->isChecked();
     Settings::values.use_vsync_new = ui->toggle_vsync_new->isChecked();
 }

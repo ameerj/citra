@@ -144,6 +144,8 @@ void TelemetrySession::AddInitialInfo(Loader::AppLoader& app_loader) {
     AddField(Telemetry::FieldType::UserConfig, "Renderer_UseShaderJit",
              Settings::values.use_shader_jit);
     AddField(Telemetry::FieldType::UserConfig, "Renderer_UseVsync", Settings::values.use_vsync_new);
+    AddField(Telemetry::FieldType::UserConfig, "Renderer_GraphicsDebug",
+             Settings::values.graphics_debug);
     AddField(Telemetry::FieldType::UserConfig, "Renderer_FilterMode", Settings::values.filter_mode);
     AddField(Telemetry::FieldType::UserConfig, "Renderer_Render3d",
              static_cast<int>(Settings::values.render_3d));

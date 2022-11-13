@@ -138,6 +138,16 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="QCheckBox" name="toggle_graphics_debug">
+        <property name="toolTip">
+         <string>Enable host renderer debug messages to be logged.</string>
+        </property>
+        <property name="text">
+         <string>Enable Graphics Debugging</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>

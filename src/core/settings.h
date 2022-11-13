@@ -170,6 +170,7 @@ struct Values {
     bool use_disk_shader_cache;
     bool shaders_accurate_mul;
     bool use_shader_jit;
+    bool graphics_debug;
     u16 resolution_factor;
     bool use_frame_limit_alternate;
     u16 frame_limit;

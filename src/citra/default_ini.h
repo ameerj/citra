@@ -122,6 +122,10 @@ shaders_accurate_mul =
 # 0: Interpreter (slow), 1 (default): JIT (fast)
 use_shader_jit =
 
+# Whether to enable the renderer debug messages
+# 0 (default): Disabled, 1: Enabled
+graphics_debug =
+
 # Forces VSync on the display thread. Usually doesn't impact performance, but on some drivers it can
 # so only turn this off if you notice a speed difference.
 # 0: Off, 1 (default): On

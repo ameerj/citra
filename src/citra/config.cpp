@@ -122,6 +122,7 @@ void Config::ReadValues() {
     Settings::values.shaders_accurate_mul =
         sdl2_config->GetBoolean("Renderer", "shaders_accurate_mul", true);
     Settings::values.use_shader_jit = sdl2_config->GetBoolean("Renderer", "use_shader_jit", true);
+    Settings::values.graphics_debug = sdl2_config->GetBoolean("Renderer", "graphics_debug", false);
     Settings::values.resolution_factor =
         static_cast<u16>(sdl2_config->GetInteger("Renderer", "resolution_factor", 1));
     Settings::values.use_disk_shader_cache =
