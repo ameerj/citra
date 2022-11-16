@@ -1746,6 +1746,9 @@ void GMainWindow::ToggleWindowMode() {
 }
 
 void GMainWindow::UpdateSecondaryWindowVisibility() {
+    if (!emulation_running) {
+        return;
+    }
     if (Settings::values.layout_option == Settings::LayoutOption::SeparateWindows) {
         secondary_window->RestoreGeometry();
         secondary_window->show();
